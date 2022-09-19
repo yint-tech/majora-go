@@ -1,0 +1,18 @@
+tunnel_addr: majora-vps-zj.iinti.cn:5879
+dns_server: 114.114.114.114:53
+log_level: info
+log_path: ./majora-log/
+daemon: true
+reconn_interval: 5s
+net_check_interval: 5s
+net_check_url: https://www.baidu.com
+dns_cache_duration: 10m
+
+redial:
+  command: /bin/bash
+  exec_path: /root/ppp_redial.sh
+  redial_duration: 5m
+  wait_time: 15s
+
+extra:
+  account: superman

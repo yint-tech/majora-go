@@ -1,0 +1,13 @@
+.idea
+echo-cli
+dist/config.yaml
+dist
+majora-cli
+bin
+nohup.out
+release
+./majora
+*.log
+majora.log
+std.log
+majora
