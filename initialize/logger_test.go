@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"testing"
+
 	"iinti.cn/majora-go/log"
 )
 

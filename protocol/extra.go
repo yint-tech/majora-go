@@ -31,7 +31,6 @@ func DecodeExtra(input []byte) map[string]string {
 	buffer := bytes.NewBuffer(input)
 
 	headerSize, err := buffer.ReadByte()
-
 	if err != nil {
 		log.Run().Errorf("DecodeExtra error %+v", err)
 		return map[string]string{}

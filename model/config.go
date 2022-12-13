@@ -1,10 +1,12 @@
 package model
 
 import (
+	"os"
 	"time"
 
 	"github.com/google/uuid"
 	"iinti.cn/majora-go/common"
+	"iinti.cn/majora-go/log"
 )
 
 type Redial struct {
@@ -30,8 +32,8 @@ type Configure struct {
 	ReconnInterval   time.Duration `mapstructure:"reconn_interval"`
 	ClientID         string        `mapstructure:"client_id"`
 	NetCheckInterval time.Duration `mapstructure:"net_check_interval"`
-	NetCheckUrl      string        `mapstructure:"net_check_url"`
-	DnsCacheDuration time.Duration `mapstructure:"dns_cache_duration"`
+	NetCheckURL      string        `mapstructure:"net_check_url"`
+	DNSCacheDuration time.Duration `mapstructure:"dns_cache_duration"`
 	Extra            Extra         `mapstructure:"extra"`
 	Redial           Redial        `mapstructure:"redial"`
 }
@@ -62,6 +64,11 @@ func (r Redial) Valid() bool {
 	}
 
 	if len(r.ExecPath) == 0 {
+		return false
+	}
+
+	if _, err := os.Stat(r.ExecPath); err != nil {
+		log.Run().Errorf("read %s with error %s", r.ExecPath, err.Error())
 		return false
 	}
 

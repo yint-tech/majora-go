@@ -1,4 +1,4 @@
-package global
+package global //nolint:typecheck
 
 import (
 	"iinti.cn/majora-go/env"

@@ -8,11 +8,11 @@ net_check_interval: 5s
 net_check_url: https://www.baidu.com
 dns_cache_duration: 10m
 
-redial:
-  command: /bin/bash
-  exec_path: /root/ppp_redial.sh
-  redial_duration: 5m
-  wait_time: 15s
+#redial:
+#  command: /bin/bash
+#  exec_path: /root/ppp_redial.sh
+#  redial_duration: 5m
+#  wait_time: 15s
 
-extra:
-  account: superman
+#extra:
+#  account: superman

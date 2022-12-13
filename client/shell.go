@@ -7,16 +7,12 @@ import (
 	"iinti.cn/majora-go/log"
 )
 
-var (
-	cmdErrorMap = map[string]string{
-		KeyFailedMsg:  "no param:{cmd} present",
-		KeyStatusCode: "-1",
-	}
-)
+var cmdErrorMap = map[string]string{
+	KeyFailedMsg:  "no param:{cmd} present",
+	KeyStatusCode: "-1",
+}
 
-var (
-	shellCmd = &ShellCmd{}
-)
+var shellCmd = &ShellCmd{}
 
 type ShellCmd struct{}
 
@@ -34,9 +30,8 @@ func (e *ShellCmd) Handle(param map[string]string, callback Callback) {
 
 	trueCmd := strings.Split(targetCmd, " ")
 
-	cmd := exec.Command(trueCmd[0], trueCmd[1:]...)
+	cmd := exec.Command(trueCmd[0], trueCmd[1:]...) //nolint:gosec
 	out, err := cmd.CombinedOutput()
-
 	if err != nil {
 		log.Run().Errorf("exec error %+v", err)
 		return
@@ -46,5 +41,4 @@ func (e *ShellCmd) Handle(param map[string]string, callback Callback) {
 		KeyData:       string(out),
 		KeyStatusCode: "0",
 	})
-
 }

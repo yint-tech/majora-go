@@ -11,8 +11,7 @@ type Decoder interface {
 	Decode(reader *bufio.Reader) (*MajoraPacket, error)
 }
 
-type MajoraPacketDecoder struct {
-}
+type MajoraPacketDecoder struct{}
 
 func (mpd *MajoraPacketDecoder) Decode(reader *bufio.Reader) (pack *MajoraPacket, err error) {
 	magicbs := make([]byte, common.MagicSize)

@@ -11,19 +11,17 @@ const (
 )
 
 func GetPPP() string {
-	return GetIpByName(netname)
+	return GetIPByName(netname)
 }
 
-func GetIpByName(netname string) string {
+func GetIPByName(netname string) string {
 	ni, err := net.InterfaceByName(netname)
-
 	if err != nil {
 		log.Run().Warnf("get %s ip error %s", netname, err)
 		return ""
 	}
 
 	addrs, err := ni.Addrs()
-
 	if err != nil {
 		log.Run().Warnf("get ip addr err %s", err)
 		return ""

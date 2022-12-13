@@ -2,6 +2,7 @@ package infra
 
 import (
 	"crypto/tls"
+	"io"
 	"math/rand"
 	"net/http"
 	"time"
@@ -11,12 +12,9 @@ import (
 
 // 网络检测
 
-var (
+var ( //nolint:gofumpt
 	httpCli *http.Client
-)
-
-var (
-	pingUrl = []string{
+	pingURL = []string{
 		"https://www.baidu.com",
 		"https://www.bilibili.com",
 		"https://www.taobao.com",
@@ -48,15 +46,17 @@ func Ping(url string) bool {
 		log.Run().Warnf("ping %s with error %+v", url, err)
 		return false
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 	return resp.StatusCode > 0
 }
 
 func RandomPing() bool {
-	return Ping(RandUrl())
+	return Ping(RandURL())
 }
 
-func RandUrl() string {
+func RandURL() string {
 	rand.Seed(time.Now().UnixNano())
-	return pingUrl[rand.Intn(len(pingUrl))]
+	return pingURL[rand.Intn(len(pingURL))]
 }

@@ -4,9 +4,7 @@ import (
 	"iinti.cn/majora-go/protocol"
 )
 
-var (
-	handlers = make(map[string]CmdHandler, 2)
-)
+var handlers = make(map[string]CmdHandler, 2)
 
 func init() {
 	handlers[shellCmd.Action()] = shellCmd

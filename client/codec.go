@@ -5,18 +5,15 @@ import (
 	"encoding/binary"
 
 	"github.com/adamweixuan/getty"
-	
+
 	"iinti.cn/majora-go/common"
 	"iinti.cn/majora-go/log"
 	"iinti.cn/majora-go/protocol"
 )
 
-var (
-	PkgCodec = &PacketCodec{}
-)
+var PkgCodec = &PacketCodec{}
 
-type PacketCodec struct {
-}
+type PacketCodec struct{}
 
 func (p *PacketCodec) Read(session getty.Session, data []byte) (interface{}, int, error) {
 	log.Run().Debugf("[PacketCodec] length:%d", len(data))

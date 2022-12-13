@@ -17,20 +17,20 @@ var (
 	MajoraSessionUser = "user"
 	UpStreamEvent     = "ReadUpStream"
 	DisconnectEvent   = "Disconnect"
-	DnsResolveEvent   = "DnsResolve"
-	sessionIdNop      = "session_id_not_set"
+	DNSResolveEvent   = "DnsResolve"
+	sessionIDNop      = "session_id_not_set"
 )
 
 func init() {
-	safe.SafeGo(func() {
+	safe.Go("trace", func() {
 		for {
 			e := <-sessionEventChan
 			if e.Err != nil {
 				log.Trace().Errorf("[%s] [%s] [%s] [%s] [%s] %s error:%+v",
-					e.natHost, e.sessionId, e.user, e.Timestamp.Format("2006-01-02 15:04:05.000000"), e.EventName, e.Message, e.Err)
+					e.natHost, e.sessionID, e.user, e.Timestamp.Format("2006-01-02 15:04:05.000000"), e.EventName, e.Message, e.Err)
 			} else {
 				log.Trace().Infof("[%s] [%s] [%s] [%s] [%s] %s",
-					e.natHost, e.sessionId, e.user, e.Timestamp.Format("2006-01-02 15:04:05.000000"), e.EventName, e.Message)
+					e.natHost, e.sessionID, e.user, e.Timestamp.Format("2006-01-02 15:04:05.000000"), e.EventName, e.Message)
 			}
 		}
 	})
@@ -53,7 +53,7 @@ type Event struct {
 
 type sessionEvent struct {
 	user      string
-	sessionId string
+	sessionID string
 	natHost   string
 	*Event
 }
@@ -69,11 +69,9 @@ type Recorder interface {
 type nopRecorder struct{}
 
 func (n *nopRecorder) RecordEvent(eventName string, message string) {
-
 }
 
 func (n *nopRecorder) RecordErrorEvent(eventName string, message string, err error) {
-
 }
 
 func (n *nopRecorder) Enable() bool {
@@ -82,7 +80,7 @@ func (n *nopRecorder) Enable() bool {
 
 type recorderImpl struct {
 	user      string
-	sessionId string
+	sessionID string
 	host      string
 }
 
@@ -99,7 +97,7 @@ func (r *recorderImpl) RecordErrorEvent(eventName string, message string, err er
 	}
 	sessionEvent := &sessionEvent{
 		user:      r.user,
-		sessionId: r.sessionId,
+		sessionID: r.sessionID,
 		natHost:   r.host,
 		Event:     event,
 	}
@@ -120,28 +118,26 @@ func (r *recorderImpl) Enable() bool {
 
 var defaultNopRecorder = nopRecorder{}
 
-func acquireRecorder(sessionId string, host, user string, enable bool) Recorder {
+func acquireRecorder(sessionID string, host, user string, enable bool) Recorder {
 	if enable {
 		return &recorderImpl{
 			user:      user,
-			sessionId: sessionId,
+			sessionID: sessionID,
 			host:      host,
 		}
-	} else {
-		return &defaultNopRecorder
 	}
-
+	return &defaultNopRecorder
 }
 
 type Session struct {
 	Recorder Recorder
 }
 
-func NewSession(sessionId string, host string, user string, enable bool) *Session {
-	if len(sessionId) == 0 {
-		sessionId = sessionIdNop
+func NewSession(sessionID string, host string, user string, enable bool) *Session {
+	if len(sessionID) == 0 {
+		sessionID = sessionIDNop
 	}
 	return &Session{
-		Recorder: acquireRecorder(sessionId, host, user, enable),
+		Recorder: acquireRecorder(sessionID, host, user, enable),
 	}
 }

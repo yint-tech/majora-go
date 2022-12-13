@@ -1,7 +1,6 @@
-package log
+package log //nolint:typecheck
 
 import (
-	"os"
 	"path/filepath"
 	"time"
 
@@ -9,9 +8,6 @@ import (
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"iinti.cn/majora-go/env"
-	"iinti.cn/majora-go/global"
 )
 
 var (
@@ -38,9 +34,6 @@ func getLogWriter(path string) zapcore.WriteSyncer {
 		MaxAge:     30,
 		Compress:   false,
 	}
-	if global.CurrentEnv == env.Debug {
-		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(lumberJackLogger))
-	}
 	return zapcore.AddSync(lumberJackLogger)
 }
 
@@ -64,7 +57,6 @@ func getEncoder() zapcore.Encoder {
 }
 
 func Init(level string, logPath string) {
-
 	if len(logPath) == 0 {
 		logPath = logDir
 	}
@@ -86,9 +78,8 @@ func initLogger(path string, caller bool, level string) *zap.Logger {
 	core := zapcore.NewCore(encoder, writeSyncer, zapLevel)
 	if caller {
 		return zap.New(core, zap.AddCaller())
-	} else {
-		return zap.New(core)
 	}
+	return zap.New(core)
 }
 
 func initSugaredLogger(path string, caller bool, level string) *zap.SugaredLogger {
