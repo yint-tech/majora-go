@@ -41,14 +41,16 @@ func init() {
 }
 
 func Ping(url string) bool {
-	resp, err := httpCli.Head(url)
+	resp, err := httpCli.Head(url) //nolint:bodyclose
+	defer func(body io.ReadCloser) {
+		if body != nil {
+			_ = body.Close()
+		}
+	}(resp.Body)
 	if err != nil {
 		log.Run().Warnf("ping %s with error %+v", url, err)
 		return false
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
 	return resp.StatusCode > 0
 }
 

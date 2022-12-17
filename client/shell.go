@@ -20,7 +20,7 @@ func (e *ShellCmd) Action() string {
 	return ActionExecShell
 }
 
-func (e *ShellCmd) Handle(param map[string]string, callback Callback) {
+func (e *ShellCmd) Handle(client *Client, param map[string]string, callback Callback) {
 	targetCmd := param["cmd"]
 	if len(targetCmd) == 0 || len(strings.TrimSpace(targetCmd)) == 0 {
 		callback.OnCmdResponse(false, cmdErrorMap)

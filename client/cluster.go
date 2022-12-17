@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"gopkg.in/fatih/set.v0"
-
 	"iinti.cn/majora-go/global"
 	"iinti.cn/majora-go/infra"
 	"iinti.cn/majora-go/log"

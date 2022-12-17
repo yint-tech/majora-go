@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/adamweixuan/getty"
-
 	"iinti.cn/majora-go/common"
 	"iinti.cn/majora-go/global"
 	"iinti.cn/majora-go/log"
@@ -270,8 +269,10 @@ func (client *Client) handleDisconnectMessage(session getty.Session, packet *pro
 	}
 }
 
-func (client *Client) handleControlMessage(_ *protocol.MajoraPacket) {
+func (client *Client) handleControlMessage(session getty.Session, pkg *protocol.MajoraPacket) {
 	log.Run().Debugf("handleControlMessage")
+	handler := &CmdHandlerManager{}
+	handler.HandleCmdMessage(client, session, pkg)
 }
 
 // handleDestroyMessage 是直接关闭nat server ?

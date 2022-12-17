@@ -117,8 +117,7 @@ func startProc(args, env []string, logFile string) (*exec.Cmd, error) {
 		cmd.Stdout = stdout
 	}
 
-	err := cmd.Start()
-	if err != nil {
+	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
 

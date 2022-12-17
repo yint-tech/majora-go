@@ -1,5 +1,11 @@
 package client
 
+import (
+	"github.com/adamweixuan/getty"
+	"iinti.cn/majora-go/log"
+	"iinti.cn/majora-go/protocol"
+)
+
 const (
 	ActionExecShell = "executeShell"
 	ActionRedial    = "redial"
@@ -15,13 +21,20 @@ type Callback interface {
 
 type CmdHandler interface {
 	Action() string
-	Handle(param map[string]string, callback Callback)
+	Handle(client *Client, param map[string]string, callback Callback)
 }
 
 type CmdResponse struct {
 	SerialNumber int64
-	Client       *Client
+	Session      getty.Session
 }
 
-func (c *CmdResponse) OnCmdResponse(_ bool, _ map[string]string) {
+func (c *CmdResponse) OnCmdResponse(_ bool, response map[string]string) {
+	packet := protocol.TypeControl.CreatePacket()
+	packet.SerialNumber = c.SerialNumber
+	packet.Extra = string(protocol.EncodeExtra(response))
+	_, _, err := c.Session.WritePkg(packet, 0) //nolint:errcheck
+	if err != nil {
+		log.Run().Error("OnCmdResponse run error:%s", err.Error())
+	}
 }

@@ -1,14 +1,13 @@
 package infra
 
 import (
+	"os"
 	"os/exec"
 	"runtime"
 	"time"
 
-	"iinti.cn/majora-go/global" //nolint:gci
-
 	"go.uber.org/atomic"
-
+	"iinti.cn/majora-go/global" //nolint:gci
 	"iinti.cn/majora-go/log"
 )
 
@@ -39,7 +38,7 @@ func (p *PPPRedial) Redial(tag string) bool {
 		}(time.Now())
 		for {
 			retry++
-			status := command()
+			status := Command()
 			pingBaidu := RandomPing()
 			log.Run().Infof("[PPPRedial %s] net check: %d->%v", tag, retry, pingBaidu)
 			if pingBaidu && status {
@@ -57,17 +56,37 @@ func (p *PPPRedial) RedialByCheck() bool {
 	return p.Redial("check")
 }
 
-func command() bool {
+func IsEnvOk() bool {
 	execPath := global.Config.Redial.ExecPath
 	if len(execPath) == 0 {
 		log.Run().Warn("[Redial] exec file is empty")
-		return true
+		return false
 	}
+
+	if _, err := os.Stat(execPath); err != nil {
+		log.Run().Warn("[Redial] stat execpath error:%s", err.Error())
+		return false
+	}
+
 	command := global.Config.Redial.Command
 	if len(command) == 0 {
-		log.Run().Warn("[Redial] command is empty")
+		log.Run().Warn("[Redial] Command is empty")
+		return false
+	}
+
+	if _, err := os.Stat(command); err != nil {
+		log.Run().Warn("[Redial] stat command error:%s", err.Error())
+		return false
+	}
+	return true
+}
+
+func Command() bool {
+	if !IsEnvOk() {
 		return true
 	}
+	execPath := global.Config.Redial.ExecPath
+	command := global.Config.Redial.Command
 
 	args := cmdUnix
 	if runtime.GOOS == "windows" {

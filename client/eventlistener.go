@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/adamweixuan/getty"
-
 	"iinti.cn/majora-go/common"
 	"iinti.cn/majora-go/log"
 	"iinti.cn/majora-go/protocol"
@@ -68,7 +67,7 @@ func (m *MajoraEventListener) OnMessage(session getty.Session, input interface{}
 	case protocol.TypeDisconnect:
 		m.client.handleDisconnectMessage(session, majoraPacket)
 	case protocol.TypeControl:
-		m.client.handleControlMessage(majoraPacket)
+		m.client.handleControlMessage(session, majoraPacket)
 	case protocol.TypeDestroy:
 		m.client.handleDestroyMessage()
 	}

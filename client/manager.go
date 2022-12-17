@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/adamweixuan/getty"
 	"iinti.cn/majora-go/protocol"
 )
 
@@ -13,13 +14,13 @@ func init() {
 
 type CmdHandlerManager struct{}
 
-func (CmdHandlerManager) HandleCmdMessage(client *Client, packet *protocol.MajoraPacket) {
+func (CmdHandlerManager) HandleCmdMessage(client *Client, session getty.Session, packet *protocol.MajoraPacket) {
 	param := protocol.DecodeExtra(packet.Data)
 	action, ok := param[ACTION]
 
 	hook := &CmdResponse{
 		SerialNumber: packet.SerialNumber,
-		Client:       client,
+		Session:      session,
 	}
 
 	if !ok || len(action) == 0 {
@@ -39,7 +40,5 @@ func (CmdHandlerManager) HandleCmdMessage(client *Client, packet *protocol.Major
 		return
 	}
 
-	go func() {
-		cmdHandler.Handle(param, hook)
-	}()
+	cmdHandler.Handle(client, param, hook)
 }

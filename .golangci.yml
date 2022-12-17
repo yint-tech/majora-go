@@ -14,7 +14,7 @@ run:
     - ".*\\.gen\\.go"
 
 linters:
-  disable-all: true
+#  disable-all: true
   enable:
     - unused
     - errcheck
@@ -30,15 +30,19 @@ linters:
     - misspell
     - staticcheck
     - stylecheck
-    - typecheck
     - unconvert
     - unparam
-#    - gci
+    - gci
     - gosec
     - asciicheck
     - prealloc
     - predeclared
     - makezero
+    - depguard
+    - dupl
+    - bodyclose
+    - predeclared
+    - ifshort
   fast: false
 
 linters-settings:

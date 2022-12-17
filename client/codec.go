@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 
 	"github.com/adamweixuan/getty"
-
 	"iinti.cn/majora-go/common"
 	"iinti.cn/majora-go/log"
 	"iinti.cn/majora-go/protocol"

@@ -44,10 +44,10 @@ for os in $os_all; do
         cd ./packages
         if [ "x${os}" = x"windows" ]; then
             zip -rq ${majora_dir_name}.zip ${majora_dir_name}
-            scp "${majora_dir_name}.zip" root@oss.iinti.cn:/root/gohttpserver/data/majora/bin/"$majora_version"
+            scp "${majora_dir_name}.zip" root@oss.iinti.cn:/root/gohttpserver/data/majora/bin/latest/"${majora_dir_name}.zip"
         else
             tar -zcf ${majora_dir_name}.tar.gz ${majora_dir_name}
-            scp "${majora_dir_name}.tar.gz" root@oss.iinti.cn:/root/gohttpserver/data/majora-dev/bin/"$majora_version"
+            scp "${majora_dir_name}.tar.gz" root@oss.iinti.cn:/root/gohttpserver/data/majora/bin/latest/"${majora_dir_name}.tar.gz"
         fi
         cd ..
         rm -rf ${majora_path}
