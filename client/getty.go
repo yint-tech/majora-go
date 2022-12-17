@@ -2,30 +2,29 @@ package client
 
 import (
 	"fmt"
-	"github.com/adamweixuan/getty"
-	gxsync "github.com/adamweixuan/gostnops/sync"
 	"net"
 	"runtime"
 
+	"github.com/adamweixuan/getty"
+	gxsync "github.com/adamweixuan/gostnops/sync"
 	"iinti.cn/majora-go/common"
 	"iinti.cn/majora-go/log"
 )
 
-var (
-	taskPool = gxsync.NewTaskPoolSimple(runtime.GOMAXPROCS(-1) * 100)
-)
+var taskPool = gxsync.NewTaskPoolSimple(runtime.GOMAXPROCS(-1) * 100)
 
 func (client *Client) connect() {
-
 	reConnect := client.config.ReconnInterval
-
+	endpoint := fmt.Sprintf("%s:%d", client.host, client.port)
 	gettyCli := getty.NewTCPClient(
-		getty.WithServerAddress(fmt.Sprintf("%s:%d", client.host, client.port)),
+		getty.WithServerAddress(endpoint),
 		getty.WithConnectionNumber(1),
 		getty.WithClientTaskPool(taskPool),
 		getty.WithReconnectInterval(int(reConnect.Milliseconds())),
-		getty.WithLocalAddressClient(client.localAddr))
+		getty.WithLocalAddressClient(client.localAddr),
+	)
 	gettyCli.RunEventLoop(NewClientSession(client))
+	log.Run().Info("connect to %s success.", endpoint)
 	client.natTunnel = gettyCli
 }
 
@@ -80,5 +79,4 @@ func (client *Client) Redial(tag string) {
 		log.Run().Errorf("[Redial %s] write offline to server error %s", tag, err.Error())
 	}
 	log.Run().Info("[Redial %s %s] start close local session", client.host, tag)
-
 }

@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/pkg/errors"
 	"math/rand"
 	"net"
 	"net/http"
-	_ "net/http/pprof"
+	_ "net/http/pprof" //nolint:gosec
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -18,19 +17,19 @@ import (
 	"strings"
 	"syscall"
 	"time"
-	"iinti.cn/majora-go/infra"
+
+	"github.com/pkg/errors"
+	"iinti.cn/majora-go/infra" //nolint:gci
 
 	"iinti.cn/majora-go/client"
 	"iinti.cn/majora-go/daemon"
-	"iinti.cn/majora-go/global"
+	"iinti.cn/majora-go/global" //nolint:gci
 	"iinti.cn/majora-go/initialize"
 	"iinti.cn/majora-go/log"
 	"iinti.cn/majora-go/safe"
 )
 
-var (
-	configure string
-)
+var configure string
 
 var (
 	Version string
@@ -39,17 +38,17 @@ var (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	flag.StringVar(&configure, "conf", "", "./majora -c path/to/your/majora.ini")
+	flag.StringVar(&configure, "conf", "", "./majora -conf configure.yml")
 
 	flag.Parse()
 }
 
 func initial() {
 	if global.Config.PprofPort > 0 {
-		safe.SafeGo(func() {
+		safe.Go("pprof", func() {
 			addr := fmt.Sprintf("127.0.0.1:%d", global.Config.PprofPort)
 			log.Run().Infof("enable pprof: %s", addr)
-			log.Run().Error(http.ListenAndServe(addr, nil))
+			log.Run().Error(http.ListenAndServe(addr, nil)) //nolint:gosec
 		})
 	}
 
@@ -66,7 +65,11 @@ func initial() {
 func cli() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error().Errorf("cli panic %+v", err)
+			if err := recover(); err != nil {
+				var buf [4096]byte
+				n := runtime.Stack(buf[:], false)
+				log.Error().Errorf("goroutine panic.stack:%s,err:%+v", string(buf[:n]), err)
+			}
 		}
 	}()
 	log.Run().Infof("cpu count %d proc %d", runtime.NumCPU(), runtime.NumCPU()*2)
@@ -92,7 +95,7 @@ func cli() {
 	clusterClient.Start()
 }
 
-//main start
+// main start
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "version" {
 		fmt.Println(Version)
@@ -103,7 +106,7 @@ func main() {
 	if global.Config.Daemon {
 		logFile := filepath.Join(global.Config.LogPath, "daemon.log")
 		d := daemon.NewDaemon(logFile)
-		d.MaxCount = 20 //最大重启次数
+		d.MaxCount = 20 // 最大重启次数
 		d.Run()
 	}
 
@@ -113,8 +116,7 @@ func main() {
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	select {
-	case <-signalChan:
+	if <-signalChan; true {
 		time.Sleep(time.Second * 3)
 		log.Run().Warn("main process exit...")
 	}

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/adamweixuan/getty"
@@ -41,14 +42,16 @@ func (m *MajoraEventListener) OnError(session getty.Session, err error) {
 }
 
 func (m *MajoraEventListener) OnCron(session getty.Session) {
-	//log.Run().Infof("[OnCorn] Redial, session closed:%v", session.IsClosed())
-	//m.client.Redial(session, "corn")
+	// log.Run().Infof("[OnCorn] Redial, session closed:%v", session.IsClosed())
+	// m.client.Redial(session, "corn")
 }
 
 func (m *MajoraEventListener) OnMessage(session getty.Session, input interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error().Errorf("OnMessage panic %+v", err)
+			var buf [4096]byte
+			n := runtime.Stack(buf[:], false)
+			log.Error().Errorf("goroutine panic OnMessage :%s,err:%+v", string(buf[:n]), err)
 		}
 	}()
 

@@ -23,21 +23,5 @@ type CmdResponse struct {
 	Client       *Client
 }
 
-func (c *CmdResponse) OnCmdResponse(_ bool, response map[string]string) {
-	//packet := protocol.TypeControl.CreatePacket()
-	//packet.SerialNumber = c.SerialNumber
-	//packet.Data = protocol.EncodeExtra(response)
-	//if err := c.Client.WriteAndFlush(packet); err != nil {
-	//	logger.Error().Msgf("OnCmdResponse error %+v", err)
-	//}
+func (c *CmdResponse) OnCmdResponse(_ bool, _ map[string]string) {
 }
-
-//func OnRedialCmdResponse(client *Client, serialNumber int64, success bool, response map[string]string) {
-//	packet := protocol.TypeControl.CreatePacket()
-//	packet.SerialNumber = serialNumber
-//	packet.Data = protocol.EncodeExtra(response)
-//	if err := client.WriteAndFlush(packet); err != nil {
-//		logger.Error().Msgf("OnCmdResponse error %+v", err)
-//	}
-//	infra.Redial(client.config, client.cleanup)
-//}

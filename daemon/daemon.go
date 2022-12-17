@@ -37,9 +37,8 @@ func Background(logFile string, isExit bool) (*exec.Cmd, error) {
 	if err != nil {
 		log.Println(os.Getpid(), " Start child process error:", err)
 		return nil, err
-	} else {
-		log.Println(os.Getpid(), " Start child process success:", cmd.Process.Pid)
 	}
+	log.Println(os.Getpid(), " Start child process success:", cmd.Process.Pid)
 
 	if isExit {
 		os.Exit(0)
@@ -109,7 +108,7 @@ func startProc(args, env []string, logFile string) (*exec.Cmd, error) {
 	}
 
 	if logFile != "" {
-		stdout, err := os.OpenFile(logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+		stdout, err := os.OpenFile(logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0o666) //nolint:gofumpt
 		if err != nil {
 			log.Println(os.Getpid(), ": Open log file error", err)
 			return nil, err

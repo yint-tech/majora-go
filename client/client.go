@@ -1,10 +1,11 @@
 package client
 
 import (
-	"github.com/adamweixuan/getty"
-	"github.com/coocood/freecache"
 	"net"
 	"sync"
+
+	"github.com/adamweixuan/getty"
+	"github.com/coocood/freecache"
 
 	"iinti.cn/majora-go/model"
 )
@@ -50,4 +51,3 @@ func NewCli(cfg *model.Configure, host string, port int) *Client {
 func (client *Client) StartUp() {
 	client.connect()
 }
-

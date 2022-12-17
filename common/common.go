@@ -35,7 +35,7 @@ const (
 )
 
 const (
-	DefaultMode = 0755
+	DefaultMode = 0o755
 )
 
 const (

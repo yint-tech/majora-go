@@ -4,7 +4,8 @@ import (
 	"os/exec"
 	"runtime"
 	"time"
-	"iinti.cn/majora-go/global"
+
+	"iinti.cn/majora-go/global" //nolint:gci
 
 	"go.uber.org/atomic"
 
@@ -27,14 +28,14 @@ func NewPPPRedial() *PPPRedial {
 }
 
 func (p *PPPRedial) Redial(tag string) bool {
-	if p.inRedialing.CAS(false, true) {
+	if p.inRedialing.CompareAndSwap(false, true) {
 		log.Run().Infof("[PPPRedial %s] start", tag)
-		beforeIp := GetPPP()
+		beforeIP := GetPPP()
 		retry := 0
 		defer func(start time.Time) {
-			newIp := GetPPP()
+			newIP := GetPPP()
 			log.Run().Infof("[PPPRedial %s] retry %d, cost %v, ip change %s -> %s ",
-				tag, retry, time.Since(start), beforeIp, newIp)
+				tag, retry, time.Since(start), beforeIP, newIP)
 		}(time.Now())
 		for {
 			retry++
@@ -45,12 +46,11 @@ func (p *PPPRedial) Redial(tag string) bool {
 				break
 			}
 		}
-		p.inRedialing.CAS(true, false)
+		p.inRedialing.CompareAndSwap(true, false)
 		return true
-	} else {
-		log.Run().Infof("[PPPRedial %s] inRedialing ignore this", tag)
-		return false
 	}
+	log.Run().Infof("[PPPRedial %s] inRedialing ignore this", tag)
+	return false
 }
 
 func (p *PPPRedial) RedialByCheck() bool {

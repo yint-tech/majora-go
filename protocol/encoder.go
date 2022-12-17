@@ -10,8 +10,7 @@ type Encoder interface {
 	Encode(*MajoraPacket) []byte
 }
 
-type MajoraPacketEncoder struct {
-}
+type MajoraPacketEncoder struct{}
 
 func (s *MajoraPacketEncoder) Encode(packet *MajoraPacket) []byte {
 	if packet == nil {

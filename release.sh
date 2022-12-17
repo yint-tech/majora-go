@@ -16,7 +16,7 @@ rm -rf ./release/packages
 mkdir -p ./release/packages
 
 os_all='linux windows darwin freebsd'
-arch_all='386 amd64 arm arm64 mips64 mips64le mips mipsle'
+arch_all='386 amd64 arm arm64 mips64 mips64le mips mipsle riscv64'
 
 cd ./release
 
@@ -47,7 +47,7 @@ for os in $os_all; do
             scp "${majora_dir_name}.zip" root@oss.iinti.cn:/root/gohttpserver/data/majora/bin/"$majora_version"
         else
             tar -zcf ${majora_dir_name}.tar.gz ${majora_dir_name}
-            scp "${majora_dir_name}.tar.gz" root@oss.iinti.cn:/root/gohttpserver/data/majora/bin/"$majora_version"
+            scp "${majora_dir_name}.tar.gz" root@oss.iinti.cn:/root/gohttpserver/data/majora-dev/bin/"$majora_version"
         fi
         cd ..
         rm -rf ${majora_path}

@@ -4,9 +4,7 @@ import (
 	"bufio"
 )
 
-var (
-	Codec ICodec = NewDefCodec()
-)
+var Codec ICodec = NewDefCodec()
 
 type (
 	ICodec interface {

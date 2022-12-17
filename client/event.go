@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -19,7 +20,7 @@ import (
 	"iinti.cn/majora-go/trace"
 )
 
-var (
+var ( //nolint:gofumpt
 	HeartbeatPacket = protocol.TypeHeartbeat.CreatePacket()
 	OfflinePacket   = protocol.TypeOffline.CreatePacket()
 )
@@ -34,10 +35,10 @@ func (client *Client) handleHeartbeat(session getty.Session) {
 
 func (client *Client) handleConnect(packet *protocol.MajoraPacket, session getty.Session) {
 	m := decodeMap(packet.Data)
-	if len(m) <= 0 {
+	if len(m) == 0 {
 		log.Error().Errorf("Get map data from connect packet failed (sn:%d)", packet.SerialNumber)
 	}
-	sessionId, ok := m[trace.MajoraSessionName]
+	sessionID, ok := m[trace.MajoraSessionName]
 	if !ok {
 		log.Error().Errorf("Get sessionId from connect packet failed (sn:%d)", packet.SerialNumber)
 	}
@@ -49,7 +50,7 @@ func (client *Client) handleConnect(packet *protocol.MajoraPacket, session getty
 	if !ok {
 		log.Error().Errorf("Get user from connect packet failed (sn:%d)", packet.SerialNumber)
 	}
-	traceSession := trace.NewSession(sessionId, client.host, user, enableTrace == "true")
+	traceSession := trace.NewSession(sessionID, client.host, user, enableTrace == "true")
 	client.AddSession(packet, traceSession)
 	traceSession.Recorder.RecordEvent(trace.ConnectEvent, fmt.Sprintf("Start handle connect to %s (sn:%d)",
 		packet.Extra, packet.SerialNumber))
@@ -74,27 +75,29 @@ func (client *Client) handleConnect(packet *protocol.MajoraPacket, session getty
 		LocalAddr: client.localAddr,
 	}
 
-	target := hostPort[0]
+	var target string
 	ip, err := client.dnsCache.Get([]byte(hostPort[0]))
 	if err != nil {
-		traceSession.Recorder.RecordEvent(trace.DnsResolveEvent, fmt.Sprintf("Dns cache miss %s ", hostPort[0]))
+		traceSession.Recorder.RecordEvent(trace.DNSResolveEvent, fmt.Sprintf("Dns cache miss %s ", hostPort[0]))
 		hosts, dnsErr := net.LookupHost(hostPort[0])
 		if dnsErr != nil {
-			traceSession.Recorder.RecordErrorEvent(trace.DnsResolveEvent, fmt.Sprintf("Resolve %s ip error", hostPort[0]), dnsErr)
+			traceSession.Recorder.RecordErrorEvent(trace.DNSResolveEvent, fmt.Sprintf("Resolve %s ip error", hostPort[0]), dnsErr)
 			client.closeVirtualConnection(session, packet.SerialNumber)
 			return
 		}
-		err := client.dnsCache.Set([]byte(hostPort[0]), []byte(hosts[0]), int(global.Config.DnsCacheDuration.Seconds()))
+		err := client.dnsCache.Set([]byte(hostPort[0]), []byte(hosts[0]), int(global.Config.DNSCacheDuration.Seconds()))
 		if err != nil {
-			traceSession.Recorder.RecordErrorEvent(trace.DnsResolveEvent, fmt.Sprintf("Dns cache set error %s", hostPort[0]), err)
+			traceSession.Recorder.RecordErrorEvent(trace.DNSResolveEvent, fmt.Sprintf("Dns cache set error %s", hostPort[0]), err)
 		}
 		target = hosts[0]
 	} else {
 		target = string(ip)
 	}
 
-	traceSession.Recorder.RecordEvent(trace.DnsResolveEvent, fmt.Sprintf("Dns cache hit %s -> %s", hostPort[0], target))
-	conn, err := dialer.Dial(common.TCP, fmt.Sprintf("%s:%s", target, hostPort[1]))
+	traceSession.Recorder.RecordEvent(trace.DNSResolveEvent, fmt.Sprintf("Dns cache hit %s -> %s", hostPort[0], target))
+
+	// ipv6
+	conn, err := dialer.Dial(common.TCP, net.JoinHostPort(target, hostPort[1]))
 	if err != nil {
 		log.Error().Errorf("[handleConnect] %d->connect to %s->%s", packet.SerialNumber, packet.Extra, err.Error())
 		traceSession.Recorder.RecordErrorEvent(trace.ConnectEvent,
@@ -127,13 +130,12 @@ func (client *Client) handleConnect(packet *protocol.MajoraPacket, session getty
 			packet.SerialNumber), err)
 		client.closeVirtualConnection(session, packet.SerialNumber)
 		return
-	} else {
-		safe.SafeGo(func() {
-			client.handleUpStream(tcpConn, packet, session)
-		})
-		log.Run().Debugf("[handleConnect] %d->connect success to %s ", packet.SerialNumber, packet.Extra)
-		traceSession.Recorder.RecordEvent(trace.ConnectEvent, fmt.Sprintf("Replay natServer connect ready success (sn:%d)", packet.SerialNumber))
 	}
+	safe.Go("handleConnect", func() {
+		client.handleUpStream(tcpConn, packet, session)
+	})
+	log.Run().Debugf("[handleConnect] %d->connect success to %s ", packet.SerialNumber, packet.Extra)
+	traceSession.Recorder.RecordEvent(trace.ConnectEvent, fmt.Sprintf("Replay natServer connect ready success (sn:%d)", packet.SerialNumber))
 }
 
 func decodeMap(data []byte) map[string]string {
@@ -147,19 +149,19 @@ func decodeMap(data []byte) map[string]string {
 	var i int8
 	for i = 0; i < headerSize; i++ {
 		var keyLength int8
-		err = binary.Read(bytes.NewBuffer(data[:1]), binary.BigEndian, &keyLength)
+		_ = binary.Read(bytes.NewBuffer(data[:1]), binary.BigEndian, &keyLength)
 		data = data[1:]
 
 		key := make([]byte, keyLength)
-		err = binary.Read(bytes.NewBuffer(data[:keyLength]), binary.BigEndian, &key)
+		_ = binary.Read(bytes.NewBuffer(data[:keyLength]), binary.BigEndian, &key)
 		data = data[keyLength:]
 
 		var valueLength int8
-		err = binary.Read(bytes.NewBuffer(data[:1]), binary.BigEndian, &valueLength)
+		_ = binary.Read(bytes.NewBuffer(data[:1]), binary.BigEndian, &valueLength)
 		data = data[1:]
 
 		value := make([]byte, valueLength)
-		err = binary.Read(bytes.NewBuffer(data[:valueLength]), binary.BigEndian, &value)
+		_ = binary.Read(bytes.NewBuffer(data[:valueLength]), binary.BigEndian, &value)
 		data = data[valueLength:]
 
 		result[string(key)] = string(value)
@@ -168,7 +170,6 @@ func decodeMap(data []byte) map[string]string {
 }
 
 func (client *Client) handleTransfer(packet *protocol.MajoraPacket, session getty.Session) {
-
 	traceRecorder := client.GetRecorderFromSession(packet.SerialNumber)
 	traceRecorder.RecordEvent(trace.TransferEvent,
 		fmt.Sprintf("Receive transfer packet from natServer,start to be forward to target, len:%d (%d)", len(packet.Data), packet.SerialNumber))
@@ -176,7 +177,7 @@ func (client *Client) handleTransfer(packet *protocol.MajoraPacket, session gett
 	load, ok := client.connStore.Load(packet.SerialNumber)
 	if !ok {
 		log.Error().Errorf("[handleTransfer] %d-> can not find connection", packet.SerialNumber)
-		traceMessage := fmt.Sprintf("Find upsteam connection failed (%d)", packet.SerialNumber)
+		traceMessage := fmt.Sprintf("Find upstream connection failed (%d)", packet.SerialNumber)
 		traceRecorder.RecordErrorEvent(trace.TransferEvent, traceMessage, nil)
 		client.closeVirtualConnection(session, packet.SerialNumber)
 		return
@@ -294,7 +295,6 @@ func (client *Client) GetRecorderFromSession(sn int64) trace.Recorder {
 	}
 	traceSession := session.(*trace.Session)
 	return traceSession.Recorder
-
 }
 
 func (client *Client) AddConnection(packet *protocol.MajoraPacket, conn *net.TCPConn, addr string) {
@@ -309,14 +309,16 @@ func (client *Client) AddConnection(packet *protocol.MajoraPacket, conn *net.TCP
 func (client *Client) OnClose(natSession getty.Session, upStreamSession net.Conn, serialNumber int64) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error().Errorf("OnClose %+v", err)
+			var buf [4096]byte
+			n := runtime.Stack(buf[:], false)
+			log.Error().Errorf("goroutine panic OnClose :%s,err:%+v", string(buf[:n]), err)
 		}
 	}()
 	client.closeVirtualConnection(natSession, serialNumber)
 	_ = upStreamSession.Close()
 }
 
-//closeVirtualConnection disconnect to server
+// closeVirtualConnection disconnect to server
 func (client *Client) closeVirtualConnection(session getty.Session, serialNumber int64) {
 	traceRecorder := client.GetRecorderFromSession(serialNumber)
 
@@ -346,7 +348,9 @@ func (client *Client) closeVirtualConnection(session getty.Session, serialNumber
 func (client *Client) CloseAll() {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error().Errorf("OnClose %+v", err)
+			var buf [4096]byte
+			n := runtime.Stack(buf[:], false)
+			log.Error().Errorf("goroutine-CloseAll panic.stack:%s,err:%+v", string(buf[:n]), err)
 		}
 	}()
 	client.connStore.Range(func(key, value interface{}) bool {

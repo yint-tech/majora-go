@@ -23,8 +23,8 @@ type ClusterClient struct {
 
 func (c *ClusterClient) Start() {
 	c.check()
-	safe.SafeGo(func() {
-		var timer = time.NewTimer(5 * time.Minute)
+	safe.Go("start", func() {
+		timer := time.NewTimer(5 * time.Minute)
 		for {
 			c.connectNatServers()
 			<-timer.C
@@ -32,11 +32,11 @@ func (c *ClusterClient) Start() {
 		}
 	})
 	if global.Config.Redial.Valid() {
-		safe.SafeGo(func() {
+		safe.Go("redial", func() {
 			// 加上随机 防止vps在同时间重启
 			duration := c.randomDuration()
 			log.Run().Infof("Redial interval %+v", duration)
-			var timer = time.NewTimer(duration)
+			timer := time.NewTimer(duration)
 			for {
 				<-timer.C
 				c.StartRedial("cron", true)
@@ -94,7 +94,6 @@ func (c *ClusterClient) connectNatServers() {
 		needCloseClient.natTunnel.Close()
 		return true
 	})
-
 }
 
 func (c *ClusterClient) randomDuration() time.Duration {
@@ -124,11 +123,9 @@ func (c *ClusterClient) StartRedial(tag string, replay bool) {
 		client.connect()
 		return true
 	})
-
 }
 
 func (c *ClusterClient) check() {
-
 	if !global.Config.Redial.Valid() {
 		return
 	}
@@ -137,13 +134,13 @@ func (c *ClusterClient) check() {
 		interval = time.Second * 5
 	}
 
-	url := infra.RandUrl()
-	if len(global.Config.NetCheckUrl) > 0 {
-		url = global.Config.NetCheckUrl
+	url := infra.RandURL()
+	if len(global.Config.NetCheckURL) > 0 {
+		url = global.Config.NetCheckURL
 	}
 
-	safe.SafeGo(func() {
-		var timer = time.NewTimer(interval)
+	safe.Go("check", func() {
+		timer := time.NewTimer(interval)
 		for {
 			timer.Reset(interval)
 			<-timer.C
