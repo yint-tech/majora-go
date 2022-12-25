@@ -270,7 +270,7 @@ func (client *Client) handleDisconnectMessage(session getty.Session, packet *pro
 }
 
 func (client *Client) handleControlMessage(session getty.Session, pkg *protocol.MajoraPacket) {
-	log.Run().Debugf("handleControlMessage")
+	log.Run().Debugf("handleControlMessage:%+v", pkg)
 	handler := &CmdHandlerManager{}
 	handler.HandleCmdMessage(client, session, pkg)
 }

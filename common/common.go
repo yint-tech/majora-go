@@ -27,18 +27,6 @@ const (
 )
 
 const (
-	UpdateServer     = "http://81.70.224.147:10010"
-	Latest           = "latest.txt"
-	UpdateBinaryPath = "/version/"
-	// VersionTpl majora-v0.0.1-linux-arm64 name-version-os-arch
-	VersionTpl = "%s-%s-%s-%s"
-)
-
-const (
-	DefaultMode = 0o755
-)
-
-const (
 	MB      = 1024 * 1024
 	KB8     = 1024 * 8
 	BufSize = 1024 * 4
@@ -56,18 +44,9 @@ const (
 )
 
 const (
-	SessionName = "majora-cli"
-)
-
-const (
-	DefNatServerHost = "majora.iinti.cn"
-	DefNatServerPort = 5879
-	DefNatAddr       = "majora.iinti.cn:5879"
-	PprofAddr        = "127.0.0.1:6060"
-)
-
-const (
+	SessionName  = "majora-cli"
 	ExtrakeyUser = "majora.key.user"
+	DefNatAddr   = "majora.iinti.cn:5879"
 )
 
 var (

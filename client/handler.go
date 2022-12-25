@@ -33,6 +33,7 @@ func (c *CmdResponse) OnCmdResponse(_ bool, response map[string]string) {
 	packet := protocol.TypeControl.CreatePacket()
 	packet.SerialNumber = c.SerialNumber
 	packet.Extra = string(protocol.EncodeExtra(response))
+	log.Run().Info("OnCmdResponse run:%+v", response)
 	_, _, err := c.Session.WritePkg(packet, 0) //nolint:errcheck
 	if err != nil {
 		log.Run().Error("OnCmdResponse run error:%s", err.Error())

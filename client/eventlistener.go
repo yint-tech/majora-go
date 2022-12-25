@@ -36,13 +36,11 @@ func (m *MajoraEventListener) OnClose(session getty.Session) {
 }
 
 func (m *MajoraEventListener) OnError(session getty.Session, err error) {
-	log.Error().Errorf("OnError %s", err.Error())
+	log.Error().Errorf("OnError %s. session is closed:%v", err.Error(), session.IsClosed())
 	m.client.CloseAll()
 }
 
-func (m *MajoraEventListener) OnCron(session getty.Session) {
-	// log.Run().Infof("[OnCorn] Redial, session closed:%v", session.IsClosed())
-	// m.client.Redial(session, "corn")
+func (m *MajoraEventListener) OnCron(_ getty.Session) {
 }
 
 func (m *MajoraEventListener) OnMessage(session getty.Session, input interface{}) {

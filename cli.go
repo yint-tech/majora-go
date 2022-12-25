@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"net/http"
-	_ "net/http/pprof" //nolint:gosec
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -26,7 +24,6 @@ import (
 	"iinti.cn/majora-go/global" //nolint:gci
 	"iinti.cn/majora-go/initialize"
 	"iinti.cn/majora-go/log"
-	"iinti.cn/majora-go/safe"
 )
 
 var configure string
@@ -44,14 +41,6 @@ func init() {
 }
 
 func initial() {
-	if global.Config.PprofPort > 0 {
-		safe.Go("pprof", func() {
-			addr := fmt.Sprintf("127.0.0.1:%d", global.Config.PprofPort)
-			log.Run().Infof("enable pprof: %s", addr)
-			log.Run().Error(http.ListenAndServe(addr, nil)) //nolint:gosec
-		})
-	}
-
 	if len(global.Config.DNSServer) > 0 {
 		net.DefaultResolver = &net.Resolver{
 			PreferGo: true,

@@ -22,14 +22,11 @@ type ClusterClient struct {
 
 func (c *ClusterClient) Start() {
 	c.check()
-	safe.Go("start", func() {
-		timer := time.NewTimer(5 * time.Minute)
-		for {
-			c.connectNatServers()
-			<-timer.C
-			timer.Reset(5 * time.Minute)
-		}
-	})
+	c.RunStart()
+	c.RunRedial()
+}
+
+func (c *ClusterClient) RunRedial() {
 	if global.Config.Redial.Valid() {
 		safe.Go("redial", func() {
 			// 加上随机 防止vps在同时间重启
@@ -45,6 +42,17 @@ func (c *ClusterClient) Start() {
 			}
 		})
 	}
+}
+
+func (c *ClusterClient) RunStart() {
+	safe.Go("start", func() {
+		timer := time.NewTimer(5 * time.Minute)
+		for {
+			c.connectNatServers()
+			<-timer.C
+			timer.Reset(5 * time.Minute)
+		}
+	})
 }
 
 func (c *ClusterClient) connectNatServers() {

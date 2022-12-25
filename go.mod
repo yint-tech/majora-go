@@ -3,10 +3,9 @@ module iinti.cn/majora-go
 go 1.19
 
 require (
-	github.com/adamweixuan/getty v0.0.4
+	github.com/adamweixuan/getty v0.0.5
 	github.com/adamweixuan/gostnops v0.0.1
 	github.com/coocood/freecache v1.2.0
-	github.com/fsnotify/fsnotify v1.5.1
 	github.com/google/uuid v1.3.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/pkg/errors v0.9.1
@@ -19,6 +18,7 @@ require (
 require (
 	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
+	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect

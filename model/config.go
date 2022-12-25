@@ -25,7 +25,6 @@ type Configure struct {
 	LogLevel         string        `mapstructure:"log_level"`
 	LogPath          string        `mapstructure:"log_path"`
 	Daemon           bool          `mapstructure:"daemon"`
-	PprofPort        int           `mapstructure:"pprof_port"`
 	TunnelAddr       string        `mapstructure:"tunnel_addr"`
 	DNSServer        string        `mapstructure:"dns_server"`
 	LocalAddr        string        `mapstructure:"local_ip"`
@@ -47,7 +46,6 @@ func NewDefMajoraConf() *Configure {
 		Env:            "product",
 		LogLevel:       "info",
 		Daemon:         false,
-		PprofPort:      0,
 		TunnelAddr:     common.DefNatAddr,
 		DNSServer:      common.DNSServer, //nolint:typecheck
 		ReconnInterval: reconninterval,
